@@ -1,1 +1,2106 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Shape Defense</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #080a10;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    touch-action: manipulation;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    height: 100dvh;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 35%, #151a29 0%, #0b0e17 55%, #07080d 100%);
+}
+
+/* =========================
+   TOPO
+========================= */
+
+#topBar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    z-index: 20;
+    background: rgba(7, 9, 15, 0.85);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+}
+
+.stat {
+    min-width: 90px;
+}
+
+.statTitle {
+    font-size: 11px;
+    color: #8d94a8;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.statValue {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#waveBox {
+    text-align: center;
+}
+
+#waveLabel {
+    font-size: 10px;
+    color: #8d94a8;
+    text-transform: uppercase;
+}
+
+#waveNumber {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#money {
+    text-align: right;
+    color: #ffd54a;
+}
+
+/* =========================
+   CAMPO
+========================= */
+
+#battlefield {
+    position: absolute;
+    top: 68px;
+    left: 0;
+    width: 100%;
+    bottom: 285px;
+    overflow: hidden;
+}
+
+/* grade */
+
+#battlefield::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.22;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 35px 35px;
+}
+
+/* caminho */
+
+#path {
+    position: absolute;
+    left: 10%;
+    top: 0;
+    width: 80%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.pathLine {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.09) 0px,
+        rgba(255,255,255,0.09) 10px,
+        transparent 10px,
+        transparent 22px
+    );
+}
+
+/* =========================
+   TORRE
+========================= */
+
+#towerArea {
+    position: absolute;
+    left: 50%;
+    bottom: 15px;
+    transform: translateX(-50%);
+    width: 130px;
+    height: 130px;
+    z-index: 10;
+}
+
+#towerRange {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px dashed rgba(100,180,255,0.18);
+    pointer-events: none;
+}
+
+#tower {
+    position: absolute;
+    left: 50%;
+    bottom: 8px;
+    transform: translateX(-50%);
+    width: 58px;
+    height: 72px;
+}
+
+.towerBody {
+    position: absolute;
+    bottom: 0;
+    left: 5px;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(145deg, #7c8da8, #39445b);
+    border: 2px solid #aebbd0;
+    border-radius: 8px;
+    box-shadow:
+        0 0 20px rgba(100,160,255,0.25),
+        inset 0 0 15px rgba(255,255,255,0.08);
+}
+
+.towerHead {
+    position: absolute;
+    bottom: 35px;
+    left: 16px;
+    width: 26px;
+    height: 32px;
+    background: #56657e;
+    border: 2px solid #b5c3d9;
+    border-radius: 7px;
+}
+
+.towerBarrel {
+    position: absolute;
+    bottom: 50px;
+    left: 25px;
+    width: 8px;
+    height: 31px;
+    background: #d4dbea;
+    border-radius: 4px;
+    transform-origin: bottom center;
+}
+
+#towerHp {
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    transform: translateX(-50%);
+    width: 95px;
+    height: 7px;
+    background: #202533;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12);
+}
+
+#towerHpFill {
+    width: 100%;
+    height: 100%;
+    background: #5ee28a;
+    transition: width 0.2s;
+}
+
+/* =========================
+   INIMIGOS
+========================= */
+
+.enemy {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    transform: translate(-50%, -50%);
+    z-index: 8;
+}
+
+.enemyShape {
+    position: absolute;
+    inset: 3px;
+}
+
+.enemyHp {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 4px;
+    background: #20242e;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.enemyHpFill {
+    width: 100%;
+    height: 100%;
+    background: #70e090;
+}
+
+.circle {
+    border-radius: 50%;
+    background: #4d9cff;
+    box-shadow: 0 0 12px rgba(77,156,255,0.65);
+}
+
+.square {
+    background: #ff4d5e;
+    border-radius: 4px;
+    box-shadow: 0 0 12px rgba(255,77,94,0.6);
+}
+
+.triangle {
+    width: 0 !important;
+    height: 0 !important;
+    left: 50%;
+    top: 50%;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 30px solid #ffce4a;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 0 8px rgba(255,206,74,0.6));
+}
+
+/* =========================
+   PROJÉTEIS
+========================= */
+
+.projectile {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.projectile.sniper {
+    width: 12px;
+    height: 12px;
+    background: #76b7ff;
+    box-shadow: 0 0 14px #76b7ff;
+}
+
+.projectile.pistol {
+    background: #ff6574;
+    box-shadow: 0 0 8px #ff6574;
+}
+
+.projectile.burst {
+    background: #ffd85c;
+    box-shadow: 0 0 10px #ffd85c;
+}
+
+/* =========================
+   BOTTOM UI
+========================= */
+
+#bottomPanel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 285px;
+    z-index: 30;
+    background: rgba(11,14,23,0.96);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 8px 10px;
+    backdrop-filter: blur(10px);
+}
+
+#towerInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 7px;
+}
+
+#towerName {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#towerLevel {
+    font-size: 12px;
+    color: #929aae;
+}
+
+#upgradeGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.upgrade {
+    min-height: 51px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: #151a26;
+    color: white;
+    border-radius: 9px;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 12px;
+}
+
+.upgrade:active {
+    transform: scale(0.97);
+}
+
+.upgrade:disabled {
+    opacity: 0.45;
+}
+
+.upgradeTop {
+    display: flex;
+    justify-content: space-between;
+}
+
+.upgradeName {
+    font-weight: bold;
+}
+
+.upgradeLevel {
+    color: #7f899f;
+}
+
+.upgradeBottom {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3px;
+}
+
+.upgradeEffect {
+    color: #8993a8;
+    font-size: 10px;
+}
+
+.upgradeCost {
+    color: #ffd54a;
+    font-weight: bold;
+}
+
+#startButton {
+    width: 100%;
+    height: 39px;
+    margin-top: 7px;
+    border: none;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #438cff, #6a5cff);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+#startButton:active {
+    transform: scale(0.98);
+}
+
+/* =========================
+   OVERLAY
+========================= */
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(3,5,9,0.82);
+    backdrop-filter: blur(7px);
+}
+
+#overlayBox {
+    width: 85%;
+    max-width: 360px;
+    background: #111621;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    padding: 25px 20px;
+    text-align: center;
+}
+
+#overlayTitle {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+#overlayText {
+    color: #9da6b8;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+#retryButton {
+    width: 100%;
+    height: 48px;
+    border: none;
+    border-radius: 10px;
+    background: #438cff;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* =========================
+   TEXTOS FLUTUANTES
+========================= */
+
+.damageText {
+    position: absolute;
+    z-index: 50;
+    pointer-events: none;
+    font-size: 13px;
+    font-weight: bold;
+    animation: floatDamage 0.7s forwards;
+}
+
+@keyframes floatDamage {
+    from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+    to {
+        opacity: 0;
+        transform: translate(-50%, -30px);
+    }
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media (max-height: 700px) {
+    #battlefield {
+        bottom: 260px;
+    }
+
+    #bottomPanel {
+        height: 260px;
+    }
+
+    .upgrade {
+        min-height: 45px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <!-- TOPO -->
+    <div id="topBar">
+
+        <div class="stat">
+            <div class="statTitle">Vida</div>
+            <div class="statValue">
+                <span id="hpText">1000</span>
+            </div>
+        </div>
+
+        <div id="waveBox">
+            <div id="waveLabel">Rodada</div>
+            <div id="waveNumber">1</div>
+        </div>
+
+        <div class="stat" id="money">
+            <div class="statTitle">Moedas</div>
+            <div class="statValue">
+                🪙 <span id="moneyText">0</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CAMPO -->
+    <div id="battlefield">
+
+        <div id="path">
+            <div class="pathLine"></div>
+        </div>
+
+        <div id="towerArea">
+
+            <div id="towerRange"></div>
+
+            <div id="tower">
+
+                <div class="towerBarrel"></div>
+
+                <div class="towerHead"></div>
+
+                <div class="towerBody"></div>
+
+                <div id="towerHp">
+                    <div id="towerHpFill"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- PAINEL -->
+    <div id="bottomPanel">
+
+        <div id="towerInfo">
+
+            <div>
+                <div id="towerName">TORRE CENTRAL</div>
+                <div id="towerLevel">
+                    Nível <span id="levelText">1</span>
+                </div>
+            </div>
+
+            <div>
+                ⚔️ <span id="damageText">20</span>
+            </div>
+
+        </div>
+
+        <div id="upgradeGrid">
+
+            <button class="upgrade" id="upgradeDamage">
+                <div class="upgradeTop">
+                    <span class="upgradeName">⚔️ Dano</span>
+                    <span class="upgradeLevel">Lv. <span>1</span></span>
+                </div>
+                <div class="upgradeBottom">
+                    <span class="upgradeEffect">+8 dano</span>
+                    <span class="upgradeCost">🪙 50</span>
+                </div>
+            </button>
+
+            <button class="upgrade" id="upgradeSpeed">
+                <div class="upgradeTop">
+                    <span class="upgradeName">⚡ Velocidade</span>
+                    <span class="upgradeLevel">Lv. <span>1</span></span>
+                </div>
+                <div class="upgradeBottom">
+                    <span class="upgradeEffect">+10%</span>
+                    <span class="upgradeCost">🪙 70</span>
+                </div>
+            </button>
+
+            <button class="upgrade" id="upgradeRange">
+                <div class="upgradeTop">
+                    <span class="upgradeName">🎯 Alcance</span>
+                    <span class="upgradeLevel">Lv. <span>1</span></span>
+                </div>
+                <div class="upgradeBottom">
+                    <span class="upgradeEffect">+15</span>
+                    <span class="upgradeCost">🪙 80</span>
+                </div>
+            </button>
+
+            <button class="upgrade" id="upgradeHealth">
+                <div class="upgradeTop">
+                    <span class="upgradeName">❤️ Vida</span>
+                    <span class="upgradeLevel">Lv. <span>1</span></span>
+                </div>
+                <div class="upgradeBottom">
+                    <span class="upgradeEffect">+150 HP</span>
+                    <span class="upgradeCost">🪙 100</span>
+                </div>
+            </button>
+
+            <button class="upgrade" id="upgradeDefense">
+                <div class="upgradeTop">
+                    <span class="upgradeName">🛡️ Defesa</span>
+                    <span class="upgradeLevel">Lv. <span>1</span></span>
+                </div>
+                <div class="upgradeBottom">
+                    <span class="upgradeEffect">-5% dano</span>
+                    <span class="upgradeCost">🪙 120</span>
+                </div>
+            </button>
+
+            <button class="upgrade" id="upgradeCrit">
+                <div class="upgradeTop">
+                    <span class="upgradeName">💥 Crítico</span>
+                    <span class="upgradeLevel">Lv. <span>1</span></span>
+                </div>
+                <div class="upgradeBottom">
+                    <span class="upgradeEffect">+3%</span>
+                    <span class="upgradeCost">🪙 150</span>
+                </div>
+            </button>
+
+        </div>
+
+        <button id="startButton">
+            ▶ COMEÇAR RODADA
+        </button>
+
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="overlay">
+
+        <div id="overlayBox">
+
+            <div id="overlayTitle">
+                💀 TORRE DESTRUÍDA
+            </div>
+
+            <div id="overlayText">
+                Você chegou à rodada
+                <strong id="lostWave">1</strong>.
+                <br><br>
+                Seus upgrades e moedas foram mantidos.
+                <br>
+                Tente novamente para superar esta rodada.
+            </div>
+
+            <button id="retryButton">
+                🔄 TENTAR NOVAMENTE
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   CONFIGURAÇÃO
+========================================================= */
+
+const battlefield = document.getElementById("battlefield");
+
+const moneyText = document.getElementById("moneyText");
+const hpText = document.getElementById("hpText");
+const waveNumber = document.getElementById("waveNumber");
+const damageText = document.getElementById("damageText");
+const levelText = document.getElementById("levelText");
+
+const towerRange = document.getElementById("towerRange");
+const towerHpFill = document.getElementById("towerHpFill");
+
+const startButton = document.getElementById("startButton");
+const overlay = document.getElementById("overlay");
+const lostWave = document.getElementById("lostWave");
+const retryButton = document.getElementById("retryButton");
+
+const upgradeButtons = {
+    damage: document.getElementById("upgradeDamage"),
+    speed: document.getElementById("upgradeSpeed"),
+    range: document.getElementById("upgradeRange"),
+    health: document.getElementById("upgradeHealth"),
+    defense: document.getElementById("upgradeDefense"),
+    crit: document.getElementById("upgradeCrit")
+};
+
+
+/* =========================================================
+   ESTADO DO JOGO
+========================================================= */
+
+let game = {
+
+    money: 150,
+
+    wave: 1,
+
+    tower: {
+
+        level: 1,
+
+        hp: 1000,
+        maxHp: 1000,
+
+        damage: 20,
+
+        attackSpeed: 850,
+
+        range: 190,
+
+        defense: 0,
+
+        crit: 0
+
+    },
+
+    upgrades: {
+
+        damage: 1,
+        speed: 1,
+        range: 1,
+        health: 1,
+        defense: 1,
+        crit: 1
+
+    }
+
+};
+
+
+/* =========================================================
+   ESTADO DA RODADA
+========================================================= */
+
+let enemies = [];
+
+let projectiles = [];
+
+let waveRunning = false;
+
+let spawnTimer = null;
+
+let attackTimer = null;
+
+let enemiesToSpawn = 0;
+
+let enemiesSpawned = 0;
+
+let enemiesKilled = 0;
+
+let lastTime = performance.now();
+
+
+/* =========================================================
+   SALVAR
+========================================================= */
+
+function saveGame() {
+
+    localStorage.setItem(
+        "shapeDefenseSave",
+        JSON.stringify(game)
+    );
+
+}
+
+
+/* =========================================================
+   CARREGAR
+========================================================= */
+
+function loadGame() {
+
+    const save = localStorage.getItem("shapeDefenseSave");
+
+    if (!save) return;
+
+    try {
+
+        const data = JSON.parse(save);
+
+        game = data;
+
+    } catch (error) {
+
+        console.log("Save inválido.");
+
+    }
+
+}
+
+
+/* =========================================================
+   ATUALIZAR INTERFACE
+========================================================= */
+
+function updateUI() {
+
+    moneyText.textContent = Math.floor(game.money);
+
+    hpText.textContent =
+        Math.max(0, Math.floor(game.tower.hp));
+
+    waveNumber.textContent = game.wave;
+
+    damageText.textContent =
+        Math.floor(game.tower.damage);
+
+    levelText.textContent =
+        game.tower.level;
+
+    const hpPercent =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                (game.tower.hp / game.tower.maxHp) * 100
+            )
+        );
+
+    towerHpFill.style.width =
+        hpPercent + "%";
+
+    towerRange.style.width =
+        game.tower.range * 2 + "px";
+
+    towerRange.style.height =
+        game.tower.range * 2 + "px";
+
+    updateUpgradeButtons();
+
+}
+
+
+/* =========================================================
+   CUSTOS
+========================================================= */
+
+function getUpgradeCost(type) {
+
+    const level = game.upgrades[type];
+
+    const base = {
+
+        damage: 50,
+        speed: 70,
+        range: 80,
+        health: 100,
+        defense: 120,
+        crit: 150
+
+    };
+
+    return Math.floor(
+        base[type] *
+        Math.pow(1.22, level - 1)
+    );
+
+}
+
+
+/* =========================================================
+   BOTÕES DE UPGRADE
+========================================================= */
+
+function updateUpgradeButtons() {
+
+    const types = Object.keys(upgradeButtons);
+
+    types.forEach(type => {
+
+        const button =
+            upgradeButtons[type];
+
+        const cost =
+            getUpgradeCost(type);
+
+        const level =
+            game.upgrades[type];
+
+        const levelSpan =
+            button.querySelector(".upgradeLevel span");
+
+        const costSpan =
+            button.querySelector(".upgradeCost");
+
+        levelSpan.textContent =
+            level;
+
+        costSpan.textContent =
+            "🪙 " + cost;
+
+        button.disabled =
+            game.money < cost ||
+            waveRunning;
+
+    });
+
+}
+
+
+/* =========================================================
+   UPGRADE
+========================================================= */
+
+function buyUpgrade(type) {
+
+    if (waveRunning) return;
+
+    const cost =
+        getUpgradeCost(type);
+
+    if (game.money < cost) return;
+
+    game.money -= cost;
+
+    game.upgrades[type]++;
+
+    switch (type) {
+
+        case "damage":
+
+            game.tower.damage +=
+                8 + Math.floor(game.upgrades[type] * 1.5);
+
+            break;
+
+
+        case "speed":
+
+            game.tower.attackSpeed *= 0.90;
+
+            game.tower.attackSpeed =
+                Math.max(
+                    180,
+                    game.tower.attackSpeed
+                );
+
+            break;
+
+
+        case "range":
+
+            game.tower.range += 15;
+
+            break;
+
+
+        case "health":
+
+            game.tower.maxHp += 150;
+
+            game.tower.hp =
+                game.tower.maxHp;
+
+            break;
+
+
+        case "defense":
+
+            game.tower.defense += 0.05;
+
+            game.tower.defense =
+                Math.min(
+                    0.75,
+                    game.tower.defense
+                );
+
+            break;
+
+
+        case "crit":
+
+            game.tower.crit += 0.03;
+
+            game.tower.crit =
+                Math.min(
+                    0.75,
+                    game.tower.crit
+                );
+
+            break;
+
+    }
+
+    game.tower.level++;
+
+    saveGame();
+
+    updateUI();
+
+}
+
+
+/* =========================================================
+   EVENTOS DOS UPGRADES
+========================================================= */
+
+upgradeButtons.damage.onclick =
+    () => buyUpgrade("damage");
+
+upgradeButtons.speed.onclick =
+    () => buyUpgrade("speed");
+
+upgradeButtons.range.onclick =
+    () => buyUpgrade("range");
+
+upgradeButtons.health.onclick =
+    () => buyUpgrade("health");
+
+upgradeButtons.defense.onclick =
+    () => buyUpgrade("defense");
+
+upgradeButtons.crit.onclick =
+    () => buyUpgrade("crit");
+
+
+/* =========================================================
+   CRIAR INIMIGO
+========================================================= */
+
+function spawnEnemy() {
+
+    if (!waveRunning) return;
+
+    if (enemiesSpawned >= enemiesToSpawn) {
+
+        clearInterval(spawnTimer);
+
+        return;
+
+    }
+
+    enemiesSpawned++;
+
+    const roll = Math.random();
+
+    let type;
+
+    if (game.wave < 3) {
+
+        type =
+            roll < 0.65
+            ? "square"
+            : "circle";
+
+    } else {
+
+        if (roll < 0.45) {
+
+            type = "square";
+
+        } else if (roll < 0.75) {
+
+            type = "circle";
+
+        } else {
+
+            type = "triangle";
+
+        }
+
+    }
+
+    const enemy =
+        createEnemy(type);
+
+    enemies.push(enemy);
+
+}
+
+
+/* =========================================================
+   CRIAR OBJETO DO INIMIGO
+========================================================= */
+
+function createEnemy(type) {
+
+    const element =
+        document.createElement("div");
+
+    element.className =
+        "enemy";
+
+    const shape =
+        document.createElement("div");
+
+    shape.className =
+        "enemyShape " + type;
+
+    const hpBar =
+        document.createElement("div");
+
+    hpBar.className =
+        "enemyHp";
+
+    const hpFill =
+        document.createElement("div");
+
+    hpFill.className =
+        "enemyHpFill";
+
+    hpBar.appendChild(hpFill);
+
+    element.appendChild(shape);
+    element.appendChild(hpBar);
+
+    battlefield.appendChild(element);
+
+
+    /* escala da rodada */
+
+    const wave =
+        game.wave;
+
+
+    let maxHp =
+        60 +
+        wave * 18;
+
+    let speed =
+        35 +
+        wave * 1.2;
+
+    let damage =
+        8 +
+        wave * 1.5;
+
+    let reward =
+        8 +
+        Math.floor(wave * 0.8);
+
+
+    /* CÍRCULO */
+
+    if (type === "circle") {
+
+        maxHp *= 1.25;
+
+        speed *= 0.55;
+
+        damage *= 2.8;
+
+        reward *= 1.5;
+
+    }
+
+
+    /* QUADRADO */
+
+    if (type === "square") {
+
+        maxHp *= 0.85;
+
+        speed *= 1.15;
+
+        damage *= 1;
+
+    }
+
+
+    /* TRIÂNGULO */
+
+    if (type === "triangle") {
+
+        maxHp *= 0.95;
+
+        speed *= 0.85;
+
+        damage *= 1.5;
+
+        reward *= 1.25;
+
+    }
+
+
+    const startX =
+        battlefield.clientWidth / 2;
+
+    const startY =
+        -35;
+
+
+    const enemy = {
+
+        id:
+            Date.now() +
+            Math.random(),
+
+        element,
+
+        hp: maxHp,
+
+        maxHp,
+
+        speed,
+
+        damage,
+
+        reward,
+
+        type,
+
+        x: startX,
+
+        y: startY,
+
+        attackCooldown:
+            0,
+
+        alive: true
+
+    };
+
+
+    element.style.left =
+        enemy.x + "px";
+
+    element.style.top =
+        enemy.y + "px";
+
+
+    updateEnemyHp(enemy);
+
+    return enemy;
+
+}
+
+
+/* =========================================================
+   ATUALIZAR HP DO INIMIGO
+========================================================= */
+
+function updateEnemyHp(enemy) {
+
+    const fill =
+        enemy.element.querySelector(
+            ".enemyHpFill"
+        );
+
+    fill.style.width =
+        Math.max(
+            0,
+            enemy.hp /
+            enemy.maxHp *
+            100
+        ) + "%";
+
+}
+
+
+/* =========================================================
+   DISTÂNCIA
+========================================================= */
+
+function distanceToTower(enemy) {
+
+    const towerX =
+        battlefield.clientWidth / 2;
+
+    const towerY =
+        battlefield.clientHeight - 80;
+
+    return Math.hypot(
+        enemy.x - towerX,
+        enemy.y - towerY
+    );
+
+}
+
+
+/* =========================================================
+   TORRE ATACA
+========================================================= */
+
+function towerAttack() {
+
+    if (!waveRunning) return;
+
+    const validEnemies =
+        enemies.filter(
+            enemy =>
+                enemy.alive &&
+                distanceToTower(enemy)
+                <= game.tower.range
+        );
+
+
+    if (validEnemies.length === 0)
+        return;
+
+
+    /* pega o inimigo mais próximo */
+
+    validEnemies.sort(
+        (a,b) =>
+            distanceToTower(a) -
+            distanceToTower(b)
+    );
+
+
+    const target =
+        validEnemies[0];
+
+
+    let damage =
+        game.tower.damage;
+
+
+    /* crítico */
+
+    let critical =
+        false;
+
+
+    if (
+        Math.random() <
+        game.tower.crit
+    ) {
+
+        damage *= 2;
+
+        critical = true;
+
+    }
+
+
+    /* aparência do tiro */
+
+    if (target.type === "circle") {
+
+        fireProjectile(
+            target,
+            damage,
+            "sniper"
+        );
+
+    } else if (
+        target.type === "triangle"
+    ) {
+
+        fireBurst(
+            target,
+            damage
+        );
+
+    } else {
+
+        fireProjectile(
+            target,
+            damage,
+            "pistol"
+        );
+
+    }
+
+
+}
+
+
+/* =========================================================
+   PROJÉTIL
+========================================================= */
+
+function fireProjectile(
+    target,
+    damage,
+    projectileType
+) {
+
+    const projectile =
+        document.createElement("div");
+
+    projectile.className =
+        "projectile " +
+        projectileType;
+
+    battlefield.appendChild(
+        projectile
+    );
+
+
+    const towerX =
+        battlefield.clientWidth / 2;
+
+    const towerY =
+        battlefield.clientHeight - 80;
+
+
+    const projectileObject = {
+
+        element: projectile,
+
+        x: towerX,
+
+        y: towerY,
+
+        target,
+
+        damage,
+
+        speed:
+            projectileType === "sniper"
+            ? 750
+            : 1050,
+
+        alive: true
+
+    };
+
+
+    projectiles.push(
+        projectileObject
+    );
+
+}
+
+
+/* =========================================================
+   RAJADA DO TRIÂNGULO
+========================================================= */
+
+function fireBurst(
+    target,
+    damage
+) {
+
+    const targets =
+        enemies
+            .filter(e =>
+                e.alive &&
+                distanceToTower(e)
+                <= game.tower.range
+            )
+            .slice(0, 3);
+
+
+    targets.forEach(
+        (enemy, index) => {
+
+            setTimeout(() => {
+
+                if (!enemy.alive)
+                    return;
+
+                fireProjectile(
+                    enemy,
+                    damage * 0.65,
+                    "burst"
+                );
+
+            }, index * 90);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ATINGIR INIMIGO
+========================================================= */
+
+function hitEnemy(
+    enemy,
+    damage
+) {
+
+    if (!enemy.alive)
+        return;
+
+
+    enemy.hp -= damage;
+
+
+    showDamage(
+        enemy,
+        Math.round(damage)
+    );
+
+
+    updateEnemyHp(enemy);
+
+
+    if (enemy.hp <= 0) {
+
+        killEnemy(enemy);
+
+    }
+
+}
+
+
+/* =========================================================
+   MATAR INIMIGO
+========================================================= */
+
+function killEnemy(enemy) {
+
+    if (!enemy.alive)
+        return;
+
+    enemy.alive = false;
+
+    enemy.element.remove();
+
+    game.money +=
+        enemy.reward;
+
+    enemiesKilled++;
+
+    updateUI();
+
+    checkWaveFinished();
+
+}
+
+
+/* =========================================================
+   DANO NA TORRE
+========================================================= */
+
+function damageTower(
+    amount
+) {
+
+    const reduced =
+        amount *
+        (1 - game.tower.defense);
+
+    game.tower.hp -=
+        reduced;
+
+    updateUI();
+
+
+    if (game.tower.hp <= 0) {
+
+        game.tower.hp = 0;
+
+        gameOver();
+
+    }
+
+}
+
+
+/* =========================================================
+   TEXTO DE DANO
+========================================================= */
+
+function showDamage(
+    enemy,
+    amount
+) {
+
+    const text =
+        document.createElement("div");
+
+    text.className =
+        "damageText";
+
+    text.textContent =
+        "-" + amount;
+
+    text.style.left =
+        enemy.x + "px";
+
+    text.style.top =
+        enemy.y - 20 + "px";
+
+    battlefield.appendChild(text);
+
+
+    setTimeout(
+        () => text.remove(),
+        700
+    );
+
+}
+
+
+/* =========================================================
+   LOOP PRINCIPAL
+========================================================= */
+
+function gameLoop(
+    currentTime
+) {
+
+    const delta =
+        (currentTime - lastTime) /
+        1000;
+
+    lastTime =
+        currentTime;
+
+
+    /* inimigos */
+
+    enemies.forEach(
+        enemy => {
+
+            if (!enemy.alive)
+                return;
+
+
+            const towerY =
+                battlefield.clientHeight - 80;
+
+
+            const distance =
+                towerY - enemy.y;
+
+
+            /*
+              Círculo:
+              fica mais distante e
+              dispara como sniper.
+            */
+
+            if (
+                enemy.type === "circle" &&
+                distance < 180
+            ) {
+
+                enemy.attackCooldown -=
+                    delta;
+
+                if (
+                    enemy.attackCooldown <= 0
+                ) {
+
+                    damageTower(
+                        enemy.damage
+                    );
+
+                    enemy.attackCooldown =
+                        2.5;
+
+                }
+
+                return;
+
+            }
+
+
+            /*
+              Outros inimigos avançam
+            */
+
+            if (
+                distance > 45
+            ) {
+
+                enemy.y +=
+                    enemy.speed *
+                    delta;
+
+            } else {
+
+                enemy.attackCooldown -=
+                    delta;
+
+                if (
+                    enemy.attackCooldown <= 0
+                ) {
+
+                    damageTower(
+                        enemy.damage
+                    );
+
+                    enemy.attackCooldown =
+                        1;
+
+                }
+
+            }
+
+
+            enemy.element.style.top =
+                enemy.y + "px";
+
+        }
+    );
+
+
+    /* projéteis */
+
+    projectiles.forEach(
+        projectile => {
+
+            if (!projectile.alive)
+                return;
+
+
+            const target =
+                projectile.target;
+
+
+            if (
+                !target ||
+                !target.alive
+            ) {
+
+                projectile.alive =
+                    false;
+
+                projectile.element.remove();
+
+                return;
+
+            }
+
+
+            const dx =
+                target.x -
+                projectile.x;
+
+            const dy =
+                target.y -
+                projectile.y;
+
+            const distance =
+                Math.hypot(dx,dy);
+
+
+            if (distance < 10) {
+
+                hitEnemy(
+                    target,
+                    projectile.damage
+                );
+
+                projectile.alive =
+                    false;
+
+                projectile.element.remove();
+
+                return;
+
+            }
+
+
+            const movement =
+                projectile.speed *
+                delta;
+
+
+            projectile.x +=
+                dx / distance *
+                movement;
+
+            projectile.y +=
+                dy / distance *
+                movement;
+
+
+            projectile.element.style.left =
+                projectile.x + "px";
+
+            projectile.element.style.top =
+                projectile.y + "px";
+
+        }
+    );
+
+
+    projectiles =
+        projectiles.filter(
+            p => p.alive
+        );
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================================================
+   INICIAR RODADA
+========================================================= */
+
+function startWave() {
+
+    if (waveRunning)
+        return;
+
+
+    waveRunning = true;
+
+    enemies = [];
+
+    projectiles = [];
+
+    enemiesSpawned = 0;
+
+    enemiesKilled = 0;
+
+
+    /*
+      Quantidade de inimigos
+      cresce infinitamente.
+    */
+
+    enemiesToSpawn =
+        Math.floor(
+            5 +
+            game.wave * 1.7
+        );
+
+
+    startButton.textContent =
+        "⚔️ RODADA EM ANDAMENTO";
+
+
+    updateUI();
+
+
+    const spawnDelay =
+        Math.max(
+            220,
+            850 -
+            game.wave * 4
+        );
+
+
+    spawnTimer =
+        setInterval(
+            spawnEnemy,
+            spawnDelay
+        );
+
+
+    spawnEnemy();
+
+
+    clearInterval(
+        attackTimer
+    );
+
+
+    attackTimer =
+        setInterval(
+            towerAttack,
+            game.tower.attackSpeed
+        );
+
+}
+
+
+/* =========================================================
+   VERIFICAR FIM DA RODADA
+========================================================= */
+
+function checkWaveFinished() {
+
+    if (!waveRunning)
+        return;
+
+
+    const alive =
+        enemies.filter(
+            e => e.alive
+        ).length;
+
+
+    if (
+        enemiesSpawned >=
+        enemiesToSpawn &&
+        alive === 0
+    ) {
+
+        finishWave();
+
+    }
+
+}
+
+
+/* =========================================================
+   FINALIZAR RODADA
+========================================================= */
+
+function finishWave() {
+
+    waveRunning = false;
+
+    clearInterval(
+        spawnTimer
+    );
+
+    clearInterval(
+        attackTimer
+    );
+
+
+    game.money +=
+        25 +
+        game.wave * 3;
+
+
+    game.tower.hp =
+        Math.min(
+            game.tower.maxHp,
+            game.tower.hp +
+            game.tower.maxHp * 0.10
+        );
+
+
+    game.wave++;
+
+
+    saveGame();
+
+    updateUI();
+
+
+    startButton.textContent =
+        "▶ COMEÇAR RODADA " +
+        game.wave;
+
+}
+
+
+/* =========================================================
+   GAME OVER
+========================================================= */
+
+function gameOver() {
+
+    waveRunning = false;
+
+    clearInterval(
+        spawnTimer
+    );
+
+    clearInterval(
+        attackTimer
+    );
+
+
+    enemies.forEach(
+        enemy => {
+
+            if (
+                enemy.element
+            ) {
+
+                enemy.element.remove();
+
+            }
+
+        }
+    );
+
+
+    projectiles.forEach(
+        projectile => {
+
+            if (
+                projectile.element
+            ) {
+
+                projectile.element.remove();
+
+            }
+
+        }
+    );
+
+
+    enemies = [];
+
+    projectiles = [];
+
+
+    /*
+      IMPORTANTE:
+      Não alteramos a rodada.
+      Não perdemos moedas.
+      Não perdemos upgrades.
+    */
+
+
+    lostWave.textContent =
+        game.wave;
+
+
+    overlay.style.display =
+        "flex";
+
+
+    startButton.textContent =
+        "▶ COMEÇAR RODADA " +
+        game.wave;
+
+}
+
+
+/* =========================================================
+   TENTAR NOVAMENTE
+========================================================= */
+
+function retryWave() {
+
+    overlay.style.display =
+        "none";
+
+
+    /*
+      Recupera a torre parcialmente.
+      A rodada permanece exatamente igual.
+    */
+
+    game.tower.hp =
+        game.tower.maxHp;
+
+
+    updateUI();
+
+
+    startWave();
+
+}
+
+
+/* =========================================================
+   BOTÕES
+========================================================= */
+
+startButton.onclick =
+    startWave;
+
+retryButton.onclick =
+    retryWave;
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+
+loadGame();
+
+updateUI();
+
+requestAnimationFrame(
+    gameLoop
+);
+
+</script>
+
+</body>
+</html>
