@@ -273,7 +273,7 @@ body {
 
   z-index: 5;
 
-  transition: transform .12s linear;
+  transition: transform .08s linear;
 }
 
 .towerCore {
@@ -324,7 +324,7 @@ body {
 
   background: #5de58a;
 
-  transition: width .2s;
+  transition: width .15s;
 }
 
 /* =========================
@@ -567,7 +567,7 @@ body {
 
   transform: translate(-50%, -50%);
 
-  animation: explode .45s forwards;
+  animation: explode .35s forwards;
 
   pointer-events: none;
 
@@ -586,6 +586,56 @@ body {
     width: 75px;
     height: 75px;
   }
+}
+
+/* =========================
+   DANO
+========================= */
+
+.damageText {
+  position: absolute;
+
+  z-index: 200;
+
+  pointer-events: none;
+
+  font-size: 11px;
+
+  font-weight: bold;
+
+  color: white;
+
+  transform: translate(-50%, 0);
+
+  animation:
+    floatDamage .55s forwards;
+}
+
+.damageText.critical {
+  color: #ff3b4d;
+
+  font-size: 13px;
+
+  text-shadow:
+    0 0 6px rgba(255,40,60,.7);
+}
+
+@keyframes floatDamage {
+
+  from {
+    opacity: 1;
+    transform:
+      translate(-50%, 0)
+      scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform:
+      translate(-50%, -28px)
+      scale(1.05);
+  }
+
 }
 
 /* =========================
@@ -731,6 +781,7 @@ body {
   color: white;
 
   font-size: 12px;
+
   font-weight: bold;
 
   cursor: pointer;
@@ -844,33 +895,6 @@ body {
   font-weight: bold;
 }
 
-.damageText {
-  position: absolute;
-
-  z-index: 200;
-
-  pointer-events: none;
-
-  font-size: 11px;
-
-  font-weight: bold;
-
-  animation:
-    floatDamage .7s forwards;
-}
-
-@keyframes floatDamage {
-  from {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-
-  to {
-    opacity: 0;
-    transform: translate(-50%, -28px);
-  }
-}
-
 @media (max-height: 700px) {
 
   #battlefield {
@@ -915,6 +939,7 @@ body {
 
   </div>
 
+
   <div id="battlefield">
 
     <div id="arena"></div>
@@ -949,6 +974,7 @@ body {
     </div>
 
   </div>
+
 
   <div id="bottomPanel">
 
@@ -1259,6 +1285,10 @@ const bossMessage =
   document.getElementById("bossMessage");
 
 
+/* =========================
+   ESTADO
+========================= */
+
 let game = {
 
   money: 150,
@@ -1268,12 +1298,19 @@ let game = {
   tower: {
 
     level: 1,
+
     hp: 1000,
+
     maxHp: 1000,
+
     damage: 20,
+
     attackSpeed: 800,
+
     range: 170,
+
     defense: 0,
+
     crit: 0
 
   },
@@ -1281,10 +1318,15 @@ let game = {
   upgrades: {
 
     damage: 1,
+
     speed: 1,
+
     range: 1,
+
     health: 1,
+
     defense: 1,
+
     crit: 1
 
   }
@@ -1303,12 +1345,16 @@ function loadGame() {
       "shapeDefenseSave"
     );
 
-  if (!save) return;
+
+  if (!save)
+    return;
+
 
   try {
 
     const data =
       JSON.parse(save);
+
 
     if (
       data &&
@@ -1377,7 +1423,7 @@ let enemiesKilled = 0;
 
 
 /* =========================
-   POSIÇÃO DA TORRE
+   TORRE
 ========================= */
 
 function getTowerPosition() {
@@ -1400,6 +1446,7 @@ function distanceToTower(enemy) {
   const tower =
     getTowerPosition();
 
+
   return Math.hypot(
     enemy.x - tower.x,
     enemy.y - tower.y
@@ -1409,7 +1456,7 @@ function distanceToTower(enemy) {
 
 
 /* =========================
-   VISIBILIDADE COMPLETA
+   VISIBILIDADE
 ========================= */
 
 function isEnemyFullyVisible(enemy) {
@@ -1420,6 +1467,7 @@ function isEnemyFullyVisible(enemy) {
   const height =
     battlefield.clientHeight;
 
+
   const half =
     enemy.isBoss
       ? 24
@@ -1427,35 +1475,50 @@ function isEnemyFullyVisible(enemy) {
 
 
   return (
+
     enemy.x - half >= 0 &&
+
     enemy.x + half <= width &&
+
     enemy.y - half >= 0 &&
+
     enemy.y + half <= height
+
   );
 
 }
 
 
 /* =========================
-   ATUALIZAR HUD
+   HUD
 ========================= */
 
 function updateUI() {
 
   moneyText.textContent =
-    Math.floor(game.money);
+    Math.floor(
+      game.money
+    );
+
 
   hpText.textContent =
     Math.max(
       0,
-      Math.floor(game.tower.hp)
+      Math.floor(
+        game.tower.hp
+      )
     );
+
 
   waveNumber.textContent =
     game.wave;
 
+
   damageText.textContent =
-    Math.floor(game.tower.damage);
+    Math.floor(
+      game.tower.damage
+    );
+
 
   levelText.textContent =
     game.tower.level;
@@ -1478,10 +1541,13 @@ function updateUI() {
 
 
   towerRange.style.width =
-    game.tower.range * 2 + "px";
+    game.tower.range * 2 +
+    "px";
+
 
   towerRange.style.height =
-    game.tower.range * 2 + "px";
+    game.tower.range * 2 +
+    "px";
 
 
   updateUpgradeUI();
@@ -1548,7 +1614,10 @@ function getUpgradeCost(type) {
 
   return Math.floor(
     baseCosts[type] *
-    Math.pow(1.23, level - 1)
+    Math.pow(
+      1.23,
+      level - 1
+    )
   );
 
 }
@@ -1611,11 +1680,8 @@ function buyUpgrade(type) {
 
   if (
     game.money < cost
-  ) {
-
+  )
     return;
-
-  }
 
 
   game.money -= cost;
@@ -1630,7 +1696,8 @@ function buyUpgrade(type) {
     game.tower.damage +=
       8 +
       Math.floor(
-        game.upgrades.damage * 1.5
+        game.upgrades.damage *
+        1.5
       );
 
   }
@@ -1640,7 +1707,9 @@ function buyUpgrade(type) {
     type === "speed"
   ) {
 
-    game.tower.attackSpeed *= .90;
+    game.tower.attackSpeed *=
+      .90;
+
 
     game.tower.attackSpeed =
       Math.max(
@@ -1662,7 +1731,8 @@ function buyUpgrade(type) {
     type === "range"
   ) {
 
-    game.tower.range += 15;
+    game.tower.range +=
+      15;
 
   }
 
@@ -1671,7 +1741,8 @@ function buyUpgrade(type) {
     type === "health"
   ) {
 
-    game.tower.maxHp += 150;
+    game.tower.maxHp +=
+      150;
 
     game.tower.hp =
       game.tower.maxHp;
@@ -1683,7 +1754,9 @@ function buyUpgrade(type) {
     type === "defense"
   ) {
 
-    game.tower.defense += .05;
+    game.tower.defense +=
+      .05;
+
 
     game.tower.defense =
       Math.min(
@@ -1698,7 +1771,9 @@ function buyUpgrade(type) {
     type === "crit"
   ) {
 
-    game.tower.crit += .03;
+    game.tower.crit +=
+      .03;
+
 
     game.tower.crit =
       Math.min(
@@ -1739,7 +1814,7 @@ upgradeButtons.crit.onclick =
 
 
 /* =========================
-   TIMER DA TORRE
+   ATAQUE DA TORRE
 ========================= */
 
 function restartAttackTimer() {
@@ -1747,6 +1822,7 @@ function restartAttackTimer() {
   clearInterval(
     attackTimer
   );
+
 
   attackTimer =
     setInterval(
@@ -1770,7 +1846,9 @@ function chooseEnemyType() {
     game.wave;
 
 
-  if (wave < 3) {
+  if (
+    wave < 3
+  ) {
 
     return roll < .7
       ? "square"
@@ -1779,7 +1857,9 @@ function chooseEnemyType() {
   }
 
 
-  if (wave < 5) {
+  if (
+    wave < 5
+  ) {
 
     if (roll < .45)
       return "square";
@@ -1792,7 +1872,9 @@ function chooseEnemyType() {
   }
 
 
-  if (wave < 10) {
+  if (
+    wave < 10
+  ) {
 
     if (roll < .30)
       return "square";
@@ -1845,7 +1927,11 @@ function createEnemy(
 
   element.className =
     "enemy" +
-    (isBoss ? " boss" : "");
+    (
+      isBoss
+        ? " boss"
+        : ""
+    );
 
 
   const shape =
@@ -1912,15 +1998,24 @@ function createEnemy(
   let maxHp =
     65 * power;
 
+
+  /*
+   * VELOCIDADE DOS INIMIGOS
+   * Aumentada para deixar o jogo
+   * mais rápido.
+   */
+
   let speed =
-    32 *
+    42 *
     Math.pow(
-      1.018,
+      1.022,
       wave - 1
     );
 
+
   let damage =
     8 * power;
+
 
   let reward =
     Math.floor(
@@ -1938,7 +2033,7 @@ function createEnemy(
 
     maxHp *= 1.25;
 
-    speed *= .58;
+    speed *= .68;
 
     damage *= 3.2;
 
@@ -1953,7 +2048,7 @@ function createEnemy(
 
     maxHp *= .8;
 
-    speed *= 1.35;
+    speed *= 1.55;
 
     damage *= .9;
 
@@ -1966,7 +2061,7 @@ function createEnemy(
 
     maxHp *= 1;
 
-    speed *= .9;
+    speed *= 1.05;
 
     damage *= 1.4;
 
@@ -1981,7 +2076,7 @@ function createEnemy(
 
     maxHp *= 4;
 
-    speed *= .48;
+    speed *= .58;
 
     damage *= 1.4;
 
@@ -1996,7 +2091,7 @@ function createEnemy(
 
     maxHp *= 1.4;
 
-    speed *= .85;
+    speed *= 1.0;
 
     damage *= 1.6;
 
@@ -2011,7 +2106,7 @@ function createEnemy(
 
     maxHp *= 1.8;
 
-    speed *= .75;
+    speed *= .88;
 
     damage *= 2;
 
@@ -2026,7 +2121,7 @@ function createEnemy(
       20 +
       wave * .15;
 
-    speed *= .7;
+    speed *= .8;
 
     damage *= 5;
 
@@ -2052,7 +2147,9 @@ function createEnemy(
   let y;
 
 
-  if (side === 0) {
+  if (
+    side === 0
+  ) {
 
     x =
       15 +
@@ -2063,9 +2160,13 @@ function createEnemy(
 
   }
 
-  else if (side === 1) {
 
-    x = width + 40;
+  else if (
+    side === 1
+  ) {
+
+    x =
+      width + 40;
 
     y =
       15 +
@@ -2074,16 +2175,21 @@ function createEnemy(
 
   }
 
-  else if (side === 2) {
+
+  else if (
+    side === 2
+  ) {
 
     x =
       15 +
       Math.random() *
       (width - 30);
 
-    y = height + 40;
+    y =
+      height + 40;
 
   }
+
 
   else {
 
@@ -2177,7 +2283,9 @@ function spawnEnemy() {
     );
 
 
-  enemies.push(enemy);
+  enemies.push(
+    enemy
+  );
 
 }
 
@@ -2189,10 +2297,12 @@ function spawnBoss() {
 
 
   const bossTypes = [
+
     "circle",
     "hexagon",
     "star",
     "diamond"
+
   ];
 
 
@@ -2212,13 +2322,15 @@ function spawnBoss() {
     );
 
 
-  enemies.push(boss);
+  enemies.push(
+    boss
+  );
 
 }
 
 
 /* =========================
-   HP
+   HP INIMIGO
 ========================= */
 
 function updateEnemyHp(enemy) {
@@ -2241,7 +2353,7 @@ function updateEnemyHp(enemy) {
 
 
 /* =========================
-   DANO
+   TEXTO DE DANO
 ========================= */
 
 function showDamage(
@@ -2260,16 +2372,33 @@ function showDamage(
     "damageText";
 
 
+  /*
+   * Não mostra mais "CRIT".
+   * Mostra somente o número.
+   */
+
   text.textContent =
-    critical
-      ? "CRIT! " +
-        Math.round(damage)
-      : "-" +
-        Math.round(damage);
+    Math.round(
+      damage
+    );
+
+
+  /*
+   * Crítico fica vermelho.
+   */
+
+  if (critical) {
+
+    text.classList.add(
+      "critical"
+    );
+
+  }
 
 
   text.style.left =
     enemy.x + "px";
+
 
   text.style.top =
     enemy.y - 18 + "px";
@@ -2282,11 +2411,15 @@ function showDamage(
 
   setTimeout(
     () => text.remove(),
-    700
+    550
   );
 
 }
 
+
+/* =========================
+   ACERTAR
+========================= */
 
 function hitEnemy(
   enemy,
@@ -2298,9 +2431,12 @@ function hitEnemy(
     return;
 
 
-  enemy.hp -= damage;
+  enemy.hp -=
+    damage;
+
 
   updateEnemyHp(enemy);
+
 
   showDamage(
     enemy,
@@ -2330,7 +2466,8 @@ function killEnemy(enemy) {
     return;
 
 
-  enemy.alive = false;
+  enemy.alive =
+    false;
 
 
   if (
@@ -2353,8 +2490,10 @@ function killEnemy(enemy) {
 
           const d =
             Math.hypot(
-              other.x - enemy.x,
-              other.y - enemy.y
+              other.x -
+                enemy.x,
+              other.y -
+                enemy.y
             );
 
 
@@ -2383,6 +2522,7 @@ function killEnemy(enemy) {
 
   enemy.element.remove();
 
+
   enemiesKilled++;
 
 
@@ -2392,6 +2532,10 @@ function killEnemy(enemy) {
 
 }
 
+
+/* =========================
+   EXPLOSÃO
+========================= */
 
 function createExplosion(
   x,
@@ -2411,6 +2555,7 @@ function createExplosion(
   explosion.style.left =
     x + "px";
 
+
   explosion.style.top =
     y + "px";
 
@@ -2422,7 +2567,7 @@ function createExplosion(
 
   setTimeout(
     () => explosion.remove(),
-    500
+    400
   );
 
 }
@@ -2461,11 +2606,14 @@ function fireProjectile(
 
   projectiles.push({
 
-    element: projectile,
+    element:
+      projectile,
 
-    x: tower.x,
+    x:
+      tower.x,
 
-    y: tower.y,
+    y:
+      tower.y,
 
     target,
 
@@ -2473,10 +2621,14 @@ function fireProjectile(
 
     critical,
 
+    /*
+     * Projéteis mais rápidos.
+     */
+
     speed:
       type === "sniper"
-        ? 850
-        : 1050,
+        ? 1150
+        : 1400,
 
     alive: true
 
@@ -2484,6 +2636,10 @@ function fireProjectile(
 
 }
 
+
+/* =========================
+   RAJADA
+========================= */
 
 function fireBurst(
   target,
@@ -2508,7 +2664,9 @@ function fireBurst(
       setTimeout(
         () => {
 
-          if (enemy.alive) {
+          if (
+            enemy.alive
+          ) {
 
             fireProjectile(
               enemy,
@@ -2520,7 +2678,13 @@ function fireBurst(
           }
 
         },
-        index * 90
+
+        /*
+         * Rajada mais rápida.
+         */
+
+        index * 55
+
       );
 
     }
@@ -2530,7 +2694,7 @@ function fireBurst(
 
 
 /* =========================
-   TORRE ATACA
+   ATAQUE DA TORRE
 ========================= */
 
 function towerAttack() {
@@ -2563,6 +2727,7 @@ function towerAttack() {
       )
         return -1;
 
+
       if (
         !a.isBoss &&
         b.isBoss
@@ -2586,7 +2751,9 @@ function towerAttack() {
   let damage =
     game.tower.damage;
 
-  let critical = false;
+
+  let critical =
+    false;
 
 
   if (
@@ -2605,7 +2772,8 @@ function towerAttack() {
 
 
   if (
-    target.type === "circle"
+    target.type ===
+    "circle"
   ) {
 
     fireProjectile(
@@ -2617,8 +2785,10 @@ function towerAttack() {
 
   }
 
+
   else if (
-    target.type === "triangle"
+    target.type ===
+    "triangle"
   ) {
 
     fireBurst(
@@ -2628,6 +2798,7 @@ function towerAttack() {
     );
 
   }
+
 
   else {
 
@@ -2642,6 +2813,10 @@ function towerAttack() {
 
 }
 
+
+/* =========================
+   MIRAR
+========================= */
 
 function aimTower(enemy) {
 
@@ -2666,20 +2841,15 @@ function aimTower(enemy) {
 
 
 /* =========================
-   TIRO DOS INIMIGOS
+   TIRO INIMIGO
 ========================= */
 
 function enemyShoot(enemy) {
 
-  /*
-   * Segurança adicional:
-   * mesmo que alguma função tente
-   * disparar antes da hora,
-   * o tiro será bloqueado.
-   */
-
   if (
-    !isEnemyFullyVisible(enemy)
+    !isEnemyFullyVisible(
+      enemy
+    )
   ) {
 
     return false;
@@ -2708,22 +2878,28 @@ function enemyShoot(enemy) {
 
   enemyProjectiles.push({
 
-    element: projectile,
+    element:
+      projectile,
 
-    x: enemy.x,
+    x:
+      enemy.x,
 
-    y: enemy.y,
+    y:
+      enemy.y,
 
-    targetX: tower.x,
+    targetX:
+      tower.x,
 
-    targetY: tower.y,
+    targetY:
+      tower.y,
 
-    damage: enemy.damage,
+    damage:
+      enemy.damage,
 
     speed:
       enemy.type === "circle"
-        ? 450
-        : 520,
+        ? 600
+        : 700,
 
     alive: true
 
@@ -2742,7 +2918,9 @@ function enemyShoot(enemy) {
 function enemyLaser(enemy) {
 
   if (
-    !isEnemyFullyVisible(enemy)
+    !isEnemyFullyVisible(
+      enemy
+    )
   ) {
 
     return false;
@@ -2755,10 +2933,13 @@ function enemyLaser(enemy) {
 
 
   const dx =
-    tower.x - enemy.x;
+    tower.x -
+    enemy.x;
+
 
   const dy =
-    tower.y - enemy.y;
+    tower.y -
+    enemy.y;
 
 
   const distance =
@@ -2788,11 +2969,14 @@ function enemyLaser(enemy) {
   laser.style.left =
     enemy.x + "px";
 
+
   laser.style.top =
     enemy.y + "px";
 
+
   laser.style.width =
     distance + "px";
+
 
   laser.style.transform =
     `rotate(${angle}rad)`;
@@ -2810,7 +2994,7 @@ function enemyLaser(enemy) {
 
   setTimeout(
     () => laser.remove(),
-    250
+    180
   );
 
 
@@ -2820,7 +3004,7 @@ function enemyLaser(enemy) {
 
 
 /* =========================
-   DANO NA TORRE
+   DANO TORRE
 ========================= */
 
 function damageTower(amount) {
@@ -2831,7 +3015,10 @@ function damageTower(amount) {
 
   const damage =
     amount *
-    (1 - game.tower.defense);
+    (
+      1 -
+      game.tower.defense
+    );
 
 
   game.tower.hp -=
@@ -2855,7 +3042,7 @@ function damageTower(amount) {
 
 
 /* =========================
-   LOOP
+   LOOP DO JOGO
 ========================= */
 
 let lastTime =
@@ -2877,6 +3064,10 @@ function gameLoop(
     currentTime;
 
 
+  /* =====================
+     INIMIGOS
+  ===================== */
+
   enemies.forEach(
     enemy => {
 
@@ -2889,10 +3080,13 @@ function gameLoop(
 
 
       const dx =
-        tower.x - enemy.x;
+        tower.x -
+        enemy.x;
+
 
       const dy =
-        tower.y - enemy.y;
+        tower.y -
+        enemy.y;
 
 
       const distance =
@@ -2903,28 +3097,27 @@ function gameLoop(
 
 
       /* =====================
-         AZUL / SNIPER
+         AZUL
       ===================== */
 
       if (
-        enemy.type === "circle"
+        enemy.type ===
+        "circle"
       ) {
-
-        /*
-         * Primeiro ele precisa
-         * entrar completamente
-         * na tela.
-         *
-         * Só depois disso ele
-         * pode parar na distância
-         * de sniper.
-         */
 
         const fullyVisible =
           isEnemyFullyVisible(
             enemy
           );
 
+
+        /*
+         * Continua andando até
+         * estar 100% na tela.
+         *
+         * Depois vai até a posição
+         * de sniper.
+         */
 
         if (
           !fullyVisible ||
@@ -2936,6 +3129,7 @@ function gameLoop(
             enemy.speed *
             delta;
 
+
           enemy.y +=
             dy / distance *
             enemy.speed *
@@ -2943,12 +3137,6 @@ function gameLoop(
 
         }
 
-
-        /*
-         * O cooldown continua
-         * contando apenas quando
-         * o inimigo está visível.
-         */
 
         if (fullyVisible) {
 
@@ -2971,14 +3159,8 @@ function gameLoop(
 
             } else {
 
-              /*
-               * Se por algum motivo
-               * perdeu a visibilidade,
-               * tenta novamente depois.
-               */
-
               enemy.shootCooldown =
-                .15;
+                .1;
 
             }
 
@@ -2994,7 +3176,8 @@ function gameLoop(
       ===================== */
 
       else if (
-        enemy.type === "diamond"
+        enemy.type ===
+        "diamond"
       ) {
 
         const fullyVisible =
@@ -3012,6 +3195,7 @@ function gameLoop(
             dx / distance *
             enemy.speed *
             delta;
+
 
           enemy.y +=
             dy / distance *
@@ -3043,7 +3227,7 @@ function gameLoop(
             } else {
 
               enemy.shootCooldown =
-                .15;
+                .1;
 
             }
 
@@ -3069,6 +3253,7 @@ function gameLoop(
             enemy.speed *
             delta;
 
+
           enemy.y +=
             dy / distance *
             enemy.speed *
@@ -3082,7 +3267,8 @@ function gameLoop(
         ===================== */
 
         if (
-          enemy.type === "square"
+          enemy.type ===
+          "square"
         ) {
 
           enemy.shootCooldown -=
@@ -3091,25 +3277,18 @@ function gameLoop(
 
           if (
             enemy.shootCooldown <= 0 &&
-            distance < 250
+            distance < 250 &&
+            isEnemyFullyVisible(enemy)
           ) {
 
-            if (
-              isEnemyFullyVisible(
-                enemy
-              )
-            ) {
-
-              const fired =
-                enemyShoot(enemy);
+            const fired =
+              enemyShoot(enemy);
 
 
-              if (fired) {
+            if (fired) {
 
-                enemy.shootCooldown =
-                  .75;
-
-              }
+              enemy.shootCooldown =
+                .75;
 
             }
 
@@ -3123,7 +3302,8 @@ function gameLoop(
         ===================== */
 
         else if (
-          enemy.type === "triangle"
+          enemy.type ===
+          "triangle"
         ) {
 
           enemy.shootCooldown -=
@@ -3132,25 +3312,18 @@ function gameLoop(
 
           if (
             enemy.shootCooldown <= 0 &&
-            distance < 300
+            distance < 300 &&
+            isEnemyFullyVisible(enemy)
           ) {
 
-            if (
-              isEnemyFullyVisible(
-                enemy
-              )
-            ) {
-
-              const fired =
-                enemyShoot(enemy);
+            const fired =
+              enemyShoot(enemy);
 
 
-              if (fired) {
+            if (fired) {
 
-                enemy.shootCooldown =
-                  2.3;
-
-              }
+              enemy.shootCooldown =
+                2.3;
 
             }
 
@@ -3193,6 +3366,7 @@ function gameLoop(
       enemy.element.style.left =
         enemy.x + "px";
 
+
       enemy.element.style.top =
         enemy.y + "px";
 
@@ -3200,13 +3374,15 @@ function gameLoop(
 
 
   /* =========================
-     PROJÉTEIS DA TORRE
+     PROJÉTEIS TORRE
   ========================= */
 
   projectiles.forEach(
     projectile => {
 
-      if (!projectile.alive)
+      if (
+        !projectile.alive
+      )
         return;
 
 
@@ -3232,6 +3408,7 @@ function gameLoop(
       const dx =
         target.x -
         projectile.x;
+
 
       const dy =
         target.y -
@@ -3259,7 +3436,9 @@ function gameLoop(
         projectile.alive =
           false;
 
+
         projectile.element.remove();
+
 
         return;
 
@@ -3275,6 +3454,7 @@ function gameLoop(
         dx / distance *
         movement;
 
+
       projectile.y +=
         dy / distance *
         movement;
@@ -3282,6 +3462,7 @@ function gameLoop(
 
       projectile.element.style.left =
         projectile.x + "px";
+
 
       projectile.element.style.top =
         projectile.y + "px";
@@ -3303,13 +3484,16 @@ function gameLoop(
   enemyProjectiles.forEach(
     projectile => {
 
-      if (!projectile.alive)
+      if (
+        !projectile.alive
+      )
         return;
 
 
       const dx =
         projectile.targetX -
         projectile.x;
+
 
       const dy =
         projectile.targetY -
@@ -3335,7 +3519,9 @@ function gameLoop(
         projectile.alive =
           false;
 
+
         projectile.element.remove();
+
 
         return;
 
@@ -3351,6 +3537,7 @@ function gameLoop(
         dx / distance *
         movement;
 
+
       projectile.y +=
         dy / distance *
         movement;
@@ -3358,6 +3545,7 @@ function gameLoop(
 
       projectile.element.style.left =
         projectile.x + "px";
+
 
       projectile.element.style.top =
         projectile.y + "px";
@@ -3429,7 +3617,7 @@ function startWave() {
           "none";
 
       },
-      2500
+      2200
     );
 
 
@@ -3443,16 +3631,20 @@ function startWave() {
         }
 
       },
-      1800
+      1200
     );
 
   }
 
 
+  /*
+   * SPAWN MAIS RÁPIDO.
+   */
+
   const spawnDelay =
     Math.max(
-      180,
-      850 -
+      110,
+      600 -
       game.wave * 5
     );
 
@@ -3499,7 +3691,7 @@ function checkWaveFinished() {
 
   if (
     enemiesSpawned >=
-    enemiesToSpawn &&
+      enemiesToSpawn &&
     alive === 0
   ) {
 
@@ -3519,6 +3711,7 @@ function finishWave() {
   clearInterval(
     spawnTimer
   );
+
 
   clearInterval(
     attackTimer
@@ -3572,6 +3765,7 @@ function gameOver() {
   clearInterval(
     spawnTimer
   );
+
 
   clearInterval(
     attackTimer
@@ -3664,6 +3858,7 @@ function retryWave() {
 
   updateUI();
 
+
   startWave();
 
 }
@@ -3676,12 +3871,13 @@ function retryWave() {
 startButton.onclick =
   startWave;
 
+
 retryButton.onclick =
   retryWave;
 
 
 /* =========================
-   INICIALIZAÇÃO
+   INICIAR
 ========================= */
 
 loadGame();
