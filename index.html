@@ -116,7 +116,7 @@ body {
 
 
 /* =========================
-   BARRA DE PROGRESSO
+   PROGRESSO
 ========================= */
 
 #progressContainer {
@@ -1731,6 +1731,8 @@ let totalWaveEnemies = 0;
 
 let bossPending = false;
 
+let swarmPending = false;
+
 
 /* =========================
    POSIÇÃO
@@ -2207,7 +2209,7 @@ upgradeButtons.crit.onclick =
 
 
 /* =========================
-   ATAQUE DA TORRE
+   ATAQUE
 ========================= */
 
 function restartAttackTimer() {
@@ -2700,8 +2702,28 @@ function spawnEnemy() {
 
 
 /* =========================
-   SPAWN ENXAME
+   ENXAME
 ========================= */
+
+function getSwarmAmount() {
+
+  /*
+    Enxame menor que antes.
+
+    Antes:
+    15 + rodada * 1.5
+
+    Agora:
+    4 + rodada * 0.55
+  */
+
+  return Math.floor(
+    4 +
+    game.wave * .55
+  );
+
+}
+
 
 function spawnSwarmEnemy() {
 
@@ -2728,11 +2750,11 @@ function spawnSwarm() {
     return;
 
 
+  swarmPending = false;
+
+
   const swarmAmount =
-    Math.floor(
-      15 +
-      game.wave * 1.5
-    );
+    getSwarmAmount();
 
 
   for (
@@ -2811,7 +2833,7 @@ function spawnBoss() {
 
 
 /* =========================
-   VIDA INIMIGO
+   HP
 ========================= */
 
 function updateEnemyHp(enemy) {
@@ -2891,10 +2913,6 @@ function showDamage(
 
 }
 
-
-/* =========================
-   HIT
-========================= */
 
 function hitEnemy(
   enemy,
@@ -3012,8 +3030,6 @@ function killEnemy(enemy) {
 
   updateUI();
 
-  updateProgress();
-
   checkWaveFinished();
 
 }
@@ -3060,7 +3076,7 @@ function createExplosion(
 
 
 /* =========================
-   PROJÉTIL TORRE
+   PROJÉTIL
 ========================= */
 
 function fireProjectile(
@@ -3182,8 +3198,8 @@ function fireBurst(
 
 
 /* =========================
-   ATAQUE DA TORRE
-   FOCO NO MAIS PRÓXIMO
+   ATAQUE TORRE
+   FOCA NO MAIS PRÓXIMO
 ========================= */
 
 function towerAttack() {
@@ -3207,21 +3223,10 @@ function towerAttack() {
     return;
 
 
-  /*
-    A torre sempre escolhe
-    o inimigo que estiver
-    MAIS PERTO dela.
-
-    Não existe mais prioridade
-    para Boss ou tipo específico.
-  */
-
   valid.sort(
     (a, b) =>
-
       distanceToTower(a) -
       distanceToTower(b)
-
   );
 
 
@@ -3849,7 +3854,7 @@ function gameLoop(
 
 
   /* =========================
-     PROJÉTEIS DA TORRE
+     PROJÉTEIS TORRE
   ========================= */
 
   projectiles.forEach(
@@ -4072,6 +4077,12 @@ function startWave() {
 
   bossPending = false;
 
+  swarmPending = false;
+
+
+  /*
+    Quantidade normal.
+  */
 
   enemiesToSpawn =
     Math.floor(
@@ -4080,22 +4091,31 @@ function startWave() {
     );
 
 
-  const swarmWave =
-    game.wave % 5 === 0;
+  /*
+    Agora existe enxame
+    em TODAS as rodadas.
 
+    Quantidade reduzida:
+    4 + rodada * 0.55
+  */
 
   const swarmAmount =
-    swarmWave
-      ? Math.floor(
-          15 +
-          game.wave * 1.5
-        )
-      : 0;
+    getSwarmAmount();
 
 
   const bossWave =
     game.wave % 10 === 0;
 
+
+  /*
+    O progresso inclui:
+
+    monstros normais
+    +
+    monstros do enxame
+    +
+    Boss, quando existir.
+  */
 
   totalWaveEnemies =
     enemiesToSpawn +
@@ -4109,6 +4129,51 @@ function startWave() {
 
   updateProgress();
 
+
+  /*
+    O enxame começa
+    700ms depois.
+  */
+
+  swarmPending = true;
+
+
+  if (game.wave >= 1) {
+
+    swarmMessage.style.display =
+      "block";
+
+
+    setTimeout(
+      () => {
+
+        swarmMessage.style.display =
+          "none";
+
+      },
+      1800
+    );
+
+
+    setTimeout(
+      () => {
+
+        if (waveRunning) {
+
+          spawnSwarm();
+
+        }
+
+      },
+      700
+    );
+
+  }
+
+
+  /*
+    Boss a cada 10 rodadas.
+  */
 
   if (bossWave) {
 
@@ -4141,39 +4206,6 @@ function startWave() {
 
       },
       1200
-    );
-
-  }
-
-
-  if (swarmWave) {
-
-    swarmMessage.style.display =
-      "block";
-
-
-    setTimeout(
-      () => {
-
-        swarmMessage.style.display =
-          "none";
-
-      },
-      2200
-    );
-
-
-    setTimeout(
-      () => {
-
-        if (waveRunning) {
-
-          spawnSwarm();
-
-        }
-
-      },
-      700
     );
 
   }
@@ -4233,14 +4265,25 @@ function checkWaveFinished() {
     ).length;
 
 
+  /*
+    A rodada só termina quando
+    TODOS os monstros previstos
+    forem derrotados.
+
+    Isso evita que o jogo termine
+    antes do enxame aparecer.
+  */
+
   if (
 
-    enemiesSpawned >=
-      enemiesToSpawn &&
+    enemiesKilled >=
+      totalWaveEnemies &&
 
     alive === 0 &&
 
-    !bossPending
+    !bossPending &&
+
+    !swarmPending
 
   ) {
 
@@ -4296,13 +4339,6 @@ function finishWave() {
   game.wave++;
 
 
-  enemiesKilled =
-    totalWaveEnemies;
-
-
-  updateProgress();
-
-
   saveGame();
 
   updateUI();
@@ -4311,6 +4347,13 @@ function finishWave() {
   startButton.textContent =
     "COMEÇAR RODADA " +
     game.wave;
+
+
+  totalWaveEnemies = 0;
+
+  enemiesKilled = 0;
+
+  updateProgress();
 
 }
 
@@ -4388,6 +4431,8 @@ function gameOver() {
 
   bossPending = false;
 
+  swarmPending = false;
+
 
   bossMessage.style.display =
     "none";
@@ -4416,7 +4461,7 @@ function gameOver() {
 
 
 /* =========================
-   TENTAR NOVAMENTE
+   RETRY
 ========================= */
 
 function retryWave() {
