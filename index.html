@@ -53,7 +53,6 @@ body {
 
 #topBar {
   position: absolute;
-
   top: 0;
   left: 0;
 
@@ -2650,7 +2649,9 @@ function createEnemy(
     y + "px";
 
 
-  updateEnemyHp(enemy);
+  updateEnemyHp(
+    enemy
+  );
 
 
   return enemy;
@@ -3135,6 +3136,12 @@ function fireBurst(
           game.tower.range
       )
 
+      .sort(
+        (a, b) =>
+          distanceToTower(a) -
+          distanceToTower(b)
+      )
+
       .slice(0, 3);
 
 
@@ -3175,7 +3182,8 @@ function fireBurst(
 
 
 /* =========================
-   ATAQUE TORRE
+   ATAQUE DA TORRE
+   FOCO NO MAIS PRÓXIMO
 ========================= */
 
 function towerAttack() {
@@ -3199,31 +3207,21 @@ function towerAttack() {
     return;
 
 
+  /*
+    A torre sempre escolhe
+    o inimigo que estiver
+    MAIS PERTO dela.
+
+    Não existe mais prioridade
+    para Boss ou tipo específico.
+  */
+
   valid.sort(
-    (a,b) => {
+    (a, b) =>
 
-      if (
-        a.isBoss &&
-        !b.isBoss
-      )
-        return -1;
+      distanceToTower(a) -
+      distanceToTower(b)
 
-
-      if (
-        !a.isBoss &&
-        b.isBoss
-      )
-        return 1;
-
-
-      return (
-
-        distanceToTower(a) -
-        distanceToTower(b)
-
-      );
-
-    }
   );
 
 
@@ -4075,20 +4073,12 @@ function startWave() {
   bossPending = false;
 
 
-  /*
-    MONSTROS NORMAIS
-  */
-
   enemiesToSpawn =
     Math.floor(
       5 +
       game.wave * 1.8
     );
 
-
-  /*
-    ENXAME
-  */
 
   const swarmWave =
     game.wave % 5 === 0;
@@ -4103,21 +4093,9 @@ function startWave() {
       : 0;
 
 
-  /*
-    BOSS
-  */
-
   const bossWave =
     game.wave % 10 === 0;
 
-
-  /*
-    TOTAL DA RODADA
-
-    Normal +
-    Enxame +
-    Boss
-  */
 
   totalWaveEnemies =
     enemiesToSpawn +
@@ -4131,10 +4109,6 @@ function startWave() {
 
   updateProgress();
 
-
-  /*
-    BOSS
-  */
 
   if (bossWave) {
 
@@ -4172,10 +4146,6 @@ function startWave() {
   }
 
 
-  /*
-    ENXAME
-  */
-
   if (swarmWave) {
 
     swarmMessage.style.display =
@@ -4208,10 +4178,6 @@ function startWave() {
 
   }
 
-
-  /*
-    SPAWN NORMAL
-  */
 
   const spawnDelay =
     Math.max(
@@ -4266,19 +4232,6 @@ function checkWaveFinished() {
         enemy.alive
     ).length;
 
-
-  /*
-    Só termina quando:
-    
-    - todos os normais
-      foram criados;
-
-    - nenhum inimigo
-      está vivo;
-
-    - o Boss já apareceu,
-      caso exista.
-  */
 
   if (
 
@@ -4342,12 +4295,6 @@ function finishWave() {
 
   game.wave++;
 
-
-  /*
-    Barra fica cheia
-    antes de passar
-    para a próxima rodada.
-  */
 
   enemiesKilled =
     totalWaveEnemies;
